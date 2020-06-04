@@ -1,61 +1,68 @@
 function solution(relation) {
   var answer = 0;
-  let unique = []
-  let notUnique
-  let compare = []
-  let attributes = [[],[],[],[]]
-  // search duplicate value
-  function searchDuplicate (arr) {
-    let sortedArr = arr.slice().sort()
-    let results = [];
-    for (let i = 0; i < sortedArr.length - 1; i++) {
-      if (sortedArr[i + 1] == sortedArr[i]) {
-        results.push(sortedArr[i]);
-      }
+  let attributes = {}
+  let duplicate = [];
+  let compare = [];
+  let count = 2
+
+  // filter attribute
+  relation.forEach((el, x) => {
+    for (let i = 0; i < el.length; i++) {
+        if (x === 0) attributes[i] = []
+        attributes[i].push(el[i])
     }
-    return results;
+  });
+
+  // check unique attribute
+  for(const key in attributes) {
+    if (attributes[key].length === [...new Set(attributes[key])].length) {
+      answer++
+      delete attributes[key]
+    } else {
+      duplicate.push(attributes[key])
+    }
   }
-  // chech attribute unique
-  function searchUnique (arr) {
-    for (let i = 0; i < arr.length; i++) {
-      for (let j = 0; j < attributes.length; j++) {
-        attributes[j].push(arr[i][j])
-      }
-      if (i === arr.length - 1) {
-        for (let j = 0; j < attributes.length; j++) {
-          if (attributes[j].length === [...new Set(attributes[j])].length) {
-            answer++
-            unique.push(j)
-          } else {
-            if (!notUnique) {
-              notUnique = {[j]: searchDuplicate(attributes[j])}
+
+  // minimality
+  while (count <= relation[0].length && count <= duplicate.length) {
+    for (let i = 0; i < duplicate.length; i++) {
+      compare = []
+      for (let j = 0; j < duplicate[i].length; j++) {
+        switch (count) {
+          case 2:
+            if (i === duplicate.length - 1) compare.push(duplicate[0][j] + duplicate[i][j])
+            else compare.push(duplicate[i][j] + duplicate[i + 1][j])
+            break;
+          case 3:
+            if (duplicate.length === 3) compare.push(duplicate[0][j] + duplicate[1][j] + duplicate[2][j])
+            else {
+              if (i === 2) {
+                compare.push(duplicate[i][j] + duplicate[i + 1][j] + duplicate[0][j])
+              } else if (i === 3) {
+                compare.push(duplicate[i][j] + duplicate[0][j] + duplicate[1][j])
+              } else {
+                compare.push(duplicate[i][j] + duplicate[i + 1][j] + duplicate[i + 2][j])
+              }
             }
-            attributes[j] = []
-          }
+            break;
+          case 4:
+            if (i === 0) compare.push(duplicate[i][j] + duplicate[i + 1][j] + duplicate[i + 2][j] + duplicate[i + 3][j])
+          default:
+            break;
+        }
+      }
+      if (compare.length > 0 && compare.length === [...new Set(compare)].length) {
+        answer++
+        if (i === duplicate.length - 1) duplicate.splice(i, 1)
+        else {
+          duplicate.splice(i , 1)
+          i--
         }
       }
     }
+    count++
   }
-  searchUnique(relation)
-  // check attribute duplicate 
-  for (const key in notUnique) {
-    let j = Number(key)
-    let count = 0
-    for (let i = 0; i < relation.length; i++) {
-      if (relation[i][j] === notUnique[key][0]) {
-        for (let j = 0; j < unique.length; j++) {
-          if (count < 1) {
-            attributes.splice(unique[j], 1)
-            count++
-          }
-          relation[i].splice(unique[j], 1)
-        }
-        compare.push(relation[i])
-      }
-    }
-    // check minimality
-    searchUnique(compare)
-  }
+
   return answer;
 }
 

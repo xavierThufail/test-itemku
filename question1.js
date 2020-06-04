@@ -1,44 +1,46 @@
 function solution(record) {
   var answer = [];
+
   for (let i = 0; i < record.length; i++) {
-    let type = record[i].split(' ')[0]
-    let name = record[i].split(' ')[2]
-    let Id = record[i].split(' ')[1]
-    let founds = []
-    switch (type) {
+    const action = record[i].split(' ')[0]
+    const id = record[i].split(' ')[1]
+    const name = record[i].split(' ')[2]
+
+    const changeName = () => {
+      const founds = []
+
+      // search if the id has been loggin before
+      for (let j = i - 1; j >= 0; j--) {
+        id === record[j].split(' ')[1] && founds.push(j)
+      }
+      
+      // conditional to change name or not
+      if (founds.length > 0) {
+        founds.forEach(i => {
+          let temp = answer[i].split(' ')
+          temp[0] = name
+          answer[i] = temp.join(' ')
+        });
+      }
+    }
+
+    // conditional for action
+    switch (action) {
       case 'Enter':
-        // search if the Id has been loggin before
-        for (let j = i - 1; j >= 0; j--) {
-          if (Id === record[j].split(' ')[1]) founds.push(j)
-        }
-        // conditional to change name or not
-        if (founds.length > 0) {
-          founds.forEach(i => {
-            let temp = answer[i].split(' ')
-            temp[0] = name
-            answer[i] = temp.join(' ')
-          });
-        }
+        changeName()
         answer.push(`${name} came in.`)
         break;
       case 'Leave':
         answer.push(`${name} has left.`)
         break;
       case 'Change':
-        // Change Name
-        for (let j = i - 1; j >= 0; j--) {
-          if (Id === record[j].split(' ')[1]) founds.push(j)
-        }
-        founds.forEach(i => {
-          let temp = answer[i].split(' ')
-          temp[0] = name
-          answer[i] = temp.join(' ')
-        });
+        changeName()
         break;
       default:
         break;
     }
   }
+
   return answer;
 }
 
